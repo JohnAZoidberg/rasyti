@@ -518,6 +518,12 @@ var gKeyboard = (function(window, document, undefined) {
   }
 
   function highlightKey(keyChar) {
+    // If keyboard layout is set to QWRTY Zhuyin, translate it back to the
+    // letter of the keys
+    if (STORAGE.getItem('kbLayout') == 'qwerty-ch-zh') {
+      keyChar = reverseZhuyin(keyChar);
+    }
+
     // remove last key's highlighting
     if (ui.activeKey) {
       var className = ui.activeKey.className.replace(/\s.*$/, '');
@@ -756,6 +762,14 @@ var gTypist = (function(window, document, undefined) {
       keyChar = String.fromCharCode(event.keyCode);
     }
     gKeyboard.pressKey(keyChar);
+
+    // If keyboard layout is set to QWRTY Zhuyin, prevent keyboard event
+    // and manually insert Zhuyin instead of typed letter.
+    if (STORAGE.getItem('kbLayout') == 'qwerty-ch-zh') {
+      const mapped = mapZhuyin(String.fromCharCode(event.keyCode));
+      EVENTS.preventDefault(event);
+      ui.txtInput.value += mapped;
+    }
   }
 
   // disable special keys in the text input box
@@ -852,4 +866,73 @@ if ('addEventListener' in window) window.addEventListener('load', function() {
     }
   }
 }, false);
+
+const zhuyinMapping = {
+  // row #1
+  "1": "ㄅ",
+  "2": "ㄉ",
+  "3": "ˇ",
+  "4": "ˋ",
+  "5": "ㄓ",
+  "6": "ˊ",
+  "7": "˙",
+  "8": "ㄚ",
+  "9": "ㄞ",
+  "0": "ㄢ",
+  "-": "ㄦ",
+
+  // row #2
+  "q": "ㄆ",
+  "w": "ㄊ",
+  "e": "ㄍ",
+  "r": "ㄐ",
+  "t": "ㄔ",
+  "y": "ㄗ",
+  "u": "ㄧ",
+  "i": "ㄛ",
+  "o": "ㄟ",
+  "p": "ㄣ",
+
+  // row #3
+  "a": "ㄇ",
+  "s": "ㄋ",
+  "d": "ㄎ",
+  "f": "ㄑ",
+  "g": "ㄕ",
+  "h": "ㄘ",
+  "j": "ㄨ",
+  "k": "ㄜ",
+  "l": "ㄠ",
+  ";": "ㄤ",
+
+  // row #4
+  "z": "ㄈ",
+  "x": "ㄌ",
+  "c": "ㄏ",
+  "v": "ㄒ",
+  "b": "ㄖ",
+  "n": "ㄙ",
+  "m": "ㄩ",
+  ",": "ㄝ",
+  ".": "ㄡ",
+  "/": "ㄥ",
+};
+
+function reverseZhuyin(value) {
+  for(var char in zhuyinMapping){
+    if (value == [zhuyinMapping[char]]) {
+      return char;
+    }
+  }
+
+  return value;
+}
+
+function mapZhuyin(value) {
+  if (value in zhuyinMapping) {
+    return zhuyinMapping[value];
+  }
+
+  return value;
+}
 

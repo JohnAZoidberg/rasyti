@@ -62,7 +62,7 @@
           "name": "@electron-forge/publisher-github",
           "config": {
             "repository": {
-              "owner": "man-schu",
+              "owner": "JohnAZoidberg",
               "name": "rasyti",
               "draft": true
             }
